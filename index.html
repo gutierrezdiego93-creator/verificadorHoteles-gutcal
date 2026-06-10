@@ -1,0 +1,930 @@
+<!DOCTYPE html>
+<html lang="es">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no">
+<meta name="theme-color" content="#3B5BDB">
+<title>Auditoría de Activos — GUTCAL</title>
+<style>
+*,*::before,*::after{box-sizing:border-box;margin:0;padding:0}
+:root{
+  --bg:#F4F5F7;--surface:#fff;--surface2:#F9FAFB;
+  --border:#E5E7EB;--border-s:#D1D5DB;
+  --t1:#111827;--t2:#6B7280;--tm:#9CA3AF;
+  --accent:#3B5BDB;--adim:#EEF2FF;--aborder:#C7D2FE;
+  --green:#059669;--gbg:#ECFDF5;--gborder:#A7F3D0;
+  --red:#DC2626;--rbg:#FEF2F2;--rborder:#FECACA;
+  --amber:#D97706;--ambg:#FFFBEB;--amborder:#FDE68A;
+  --r:8px;--rl:12px;
+}
+body{background:var(--bg);font-family:'Inter',-apple-system,BlinkMacSystemFont,sans-serif;color:var(--t1);font-size:13px;height:100vh;overflow:hidden}
+button{font-family:inherit;cursor:pointer}
+input,select{font-family:inherit}
+
+/* ── SCREENS ── */
+.screen{position:fixed;inset:0;display:flex;flex-direction:column;background:var(--bg);transition:opacity .25s,transform .25s;z-index:10}
+.screen.hidden{opacity:0;pointer-events:none;transform:translateY(16px)}
+
+/* ── HEADER ── */
+.hdr{background:var(--surface);border-bottom:1px solid var(--border);height:52px;display:flex;align-items:center;padding:0 18px;gap:10px;flex-shrink:0;position:relative}
+.hdr-logo{width:28px;height:28px;background:var(--accent);border-radius:7px;display:flex;align-items:center;justify-content:center;flex-shrink:0}
+.hdr-logo svg{width:15px;height:15px;fill:none;stroke:#fff;stroke-width:2.3}
+.hdr-title{font-size:13px;font-weight:600}
+.hdr-sub{font-size:11px;color:var(--tm);margin-left:auto}
+.hdr-user{display:flex;align-items:center;gap:7px;margin-left:auto}
+.hdr-avatar{width:28px;height:28px;border-radius:50%;background:var(--adim);border:1px solid var(--aborder);display:flex;align-items:center;justify-content:center;font-size:11px;font-weight:600;color:var(--accent);flex-shrink:0}
+.hdr-uname{font-size:11px;color:var(--t2);max-width:120px;white-space:nowrap;overflow:hidden;text-overflow:ellipsis}
+
+/* ── LOADING ── */
+#screenLoad{background:var(--accent);align-items:center;justify-content:center;gap:16px;flex-direction:column}
+.load-logo{width:56px;height:56px;background:rgba(255,255,255,.15);border-radius:14px;display:flex;align-items:center;justify-content:center}
+.load-logo svg{width:30px;height:30px;fill:none;stroke:#fff;stroke-width:2}
+.load-title{font-size:18px;font-weight:600;color:#fff;letter-spacing:-.02em}
+.load-sub{font-size:13px;color:rgba(255,255,255,.7)}
+.load-spin{width:24px;height:24px;border:2.5px solid rgba(255,255,255,.3);border-top-color:#fff;border-radius:50%;animation:spin .8s linear infinite}
+@keyframes spin{to{transform:rotate(360deg)}}
+
+/* ── START SCREEN ── */
+#screenStart{overflow-y:auto}
+.start-wrap{max-width:520px;margin:0 auto;padding:24px 18px 40px}
+.start-greeting{background:var(--surface);border:1px solid var(--border);border-radius:var(--rl);padding:16px;display:flex;align-items:center;gap:12px;margin-bottom:20px}
+.sg-avatar{width:44px;height:44px;border-radius:50%;background:var(--adim);border:1px solid var(--aborder);display:flex;align-items:center;justify-content:center;font-size:16px;font-weight:700;color:var(--accent);flex-shrink:0}
+.sg-name{font-size:15px;font-weight:600}
+.sg-email{font-size:11px;color:var(--tm);margin-top:2px}
+.sg-role{font-size:10px;font-weight:500;padding:2px 8px;border-radius:20px;background:var(--adim);color:var(--accent);border:1px solid var(--aborder);display:inline-block;margin-top:4px}
+
+.section-lbl{font-size:9px;font-weight:700;letter-spacing:.1em;text-transform:uppercase;color:var(--tm);margin-bottom:8px}
+.card{background:var(--surface);border:1px solid var(--border);border-radius:var(--rl);padding:16px;margin-bottom:14px}
+.card-title{font-size:13px;font-weight:600;margin-bottom:12px;display:flex;align-items:center;gap:6px}
+.card-title svg{width:14px;height:14px;fill:none;stroke:var(--accent);stroke-width:2;flex-shrink:0}
+
+/* Location picker */
+.loc-select{width:100%;height:40px;background:var(--bg);border:1.5px solid var(--border-s);border-radius:var(--r);padding:0 12px;font-size:13px;color:var(--t1);outline:none;appearance:none;-webkit-appearance:none;background-image:url("data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' width='12' height='12' viewBox='0 0 24 24' fill='none' stroke='%239CA3AF' stroke-width='2'%3E%3Cpolyline points='6 9 12 15 18 9'/%3E%3C/svg%3E");background-repeat:no-repeat;background-position:right 12px center}
+.loc-select:focus{border-color:var(--accent);box-shadow:0 0 0 3px var(--adim)}
+.loc-select + .loc-select{margin-top:8px}
+
+.start-btn{width:100%;height:46px;background:var(--accent);color:#fff;border:none;border-radius:var(--r);font-size:14px;font-weight:600;letter-spacing:.02em;display:flex;align-items:center;justify-content:center;gap:8px;transition:opacity .15s;margin-top:4px}
+.start-btn:disabled{opacity:.45;cursor:default}
+.start-btn:not(:disabled):hover{opacity:.88}
+.start-btn svg{width:16px;height:16px;fill:none;stroke:#fff;stroke-width:2.5}
+
+/* Session history list */
+.sess-list{display:flex;flex-direction:column;gap:8px}
+.sess-item{background:var(--surface);border:1px solid var(--border);border-radius:var(--r);padding:11px 13px;display:flex;align-items:center;gap:10px;cursor:pointer;transition:border-color .1s}
+.sess-item:hover{border-color:var(--accent)}
+.sess-dot{width:8px;height:8px;border-radius:50%;flex-shrink:0}
+.sess-info{flex:1;min-width:0}
+.sess-loc{font-size:12px;font-weight:500;white-space:nowrap;overflow:hidden;text-overflow:ellipsis}
+.sess-meta{font-size:10px;color:var(--tm);margin-top:1px}
+.sess-counts{display:flex;gap:6px;flex-shrink:0}
+.sess-badge{font-size:10px;font-weight:600;padding:2px 7px;border-radius:20px}
+.sb-ok{background:var(--gbg);color:var(--green);border:1px solid var(--gborder)}
+.sb-err{background:var(--rbg);color:var(--red);border:1px solid var(--rborder)}
+.sess-empty{font-size:12px;color:var(--tm);text-align:center;padding:20px 0}
+
+/* ── AUDIT SCREEN ── */
+#screenAudit{overflow:hidden}
+.audit-body{flex:1;display:grid;grid-template-columns:1fr 1fr;gap:0;overflow:hidden;min-height:0}
+.audit-col{display:flex;flex-direction:column;overflow:hidden;border-right:1px solid var(--border)}
+.audit-col:last-child{border-right:none}
+.col-hdr{padding:10px 14px;border-bottom:1px solid var(--border);display:flex;align-items:center;gap:7px;flex-shrink:0;background:var(--surface)}
+.col-hdr-dot{width:10px;height:10px;border-radius:50%;flex-shrink:0}
+.col-hdr-title{font-size:11px;font-weight:700;letter-spacing:.04em;text-transform:uppercase}
+.col-hdr-cnt{margin-left:auto;font-size:11px;font-weight:600;padding:1px 8px;border-radius:20px}
+.col-items{flex:1;overflow-y:auto;padding:10px}
+.col-items::-webkit-scrollbar{width:3px}
+.col-items::-webkit-scrollbar-thumb{background:var(--border-s);border-radius:3px}
+
+.asset-card{background:var(--surface);border:1px solid var(--border);border-radius:var(--r);padding:10px 12px;margin-bottom:7px;animation:ac-in .18s ease}
+@keyframes ac-in{from{opacity:0;transform:translateY(-4px)}to{opacity:1;transform:translateY(0)}}
+.ac-code{font-size:10px;font-family:monospace;color:var(--tm);letter-spacing:.04em}
+.ac-name{font-size:12px;font-weight:600;margin-top:1px;color:var(--t1)}
+.ac-loc{font-size:10px;color:var(--tm);margin-top:3px;display:flex;align-items:center;gap:3px}
+.ac-loc svg{width:9px;height:9px;fill:none;stroke:currentColor;stroke-width:2;flex-shrink:0}
+.ac-time{font-size:9px;color:var(--tm);margin-top:4px}
+.col-empty{flex:1;display:flex;flex-direction:column;align-items:center;justify-content:center;gap:6px;padding:20px;color:var(--tm);font-size:11px;text-align:center}
+.col-empty svg{width:28px;height:28px;fill:none;stroke:var(--border-s);stroke-width:1.5}
+
+/* Input bar */
+.input-bar{border-top:1px solid var(--border);background:var(--surface);padding:10px 14px;display:flex;gap:8px;flex-shrink:0}
+.audit-input{flex:1;height:40px;background:var(--bg);border:1.5px solid var(--border-s);border-radius:var(--r);padding:0 13px;font-size:13px;font-family:monospace;color:var(--t1);outline:none;letter-spacing:.04em;transition:border-color .15s,box-shadow .15s}
+.audit-input:focus{border-color:var(--accent);box-shadow:0 0 0 3px var(--adim);background:var(--surface)}
+.audit-input::placeholder{font-family:inherit;letter-spacing:0;color:var(--tm)}
+.btn-verify{height:40px;padding:0 16px;background:var(--accent);color:#fff;border:none;border-radius:var(--r);font-size:12px;font-weight:600;letter-spacing:.03em;display:flex;align-items:center;gap:5px;white-space:nowrap;transition:opacity .15s}
+.btn-verify:hover{opacity:.88}
+.btn-verify svg{width:13px;height:13px;fill:none;stroke:#fff;stroke-width:2.5}
+.btn-close-sess{height:40px;padding:0 14px;background:var(--rbg);color:var(--red);border:1px solid var(--rborder);border-radius:var(--r);font-size:12px;font-weight:600;white-space:nowrap;display:flex;align-items:center;gap:5px;transition:opacity .15s}
+.btn-close-sess:hover{opacity:.8}
+.btn-close-sess svg{width:13px;height:13px;fill:none;stroke:currentColor;stroke-width:2}
+
+/* ── SESSION DETAIL SCREEN ── */
+#screenDetail{overflow-y:auto}
+.detail-wrap{max-width:700px;margin:0 auto;padding:20px 18px 40px}
+.detail-meta{background:var(--surface);border:1px solid var(--border);border-radius:var(--rl);padding:16px;margin-bottom:16px}
+.dm-row{display:flex;align-items:center;gap:8px;margin-bottom:6px}
+.dm-row:last-child{margin-bottom:0}
+.dm-label{font-size:11px;color:var(--tm);width:90px;flex-shrink:0}
+.dm-value{font-size:12px;font-weight:500}
+.dm-status{display:flex;gap:8px}
+.dm-badge{font-size:11px;font-weight:600;padding:2px 10px;border-radius:20px}
+
+.detail-cols{display:grid;grid-template-columns:1fr 1fr;gap:12px;margin-bottom:16px}
+.detail-col-hdr{font-size:10px;font-weight:700;text-transform:uppercase;letter-spacing:.08em;padding:8px 12px;border-radius:var(--r) var(--r) 0 0;border:1px solid var(--border);border-bottom:none}
+.detail-col-body{border:1px solid var(--border);border-radius:0 0 var(--r) var(--r);overflow:hidden}
+.detail-asset-row{padding:9px 12px;border-bottom:1px solid var(--border);display:flex;align-items:flex-start;gap:8px}
+.detail-asset-row:last-child{border-bottom:none}
+.dar-dot{width:8px;height:8px;border-radius:50%;flex-shrink:0;margin-top:3px}
+.dar-body{flex:1;min-width:0}
+.dar-code{font-size:9px;font-family:monospace;color:var(--tm);letter-spacing:.04em}
+.dar-name{font-size:11px;font-weight:600}
+.dar-loc{font-size:10px;color:var(--tm);margin-top:2px}
+.dar-time{font-size:9px;color:var(--tm);margin-top:2px}
+.col-none{padding:20px 12px;text-align:center;font-size:11px;color:var(--tm)}
+
+.action-btns{display:flex;gap:10px}
+.btn-pdf{flex:1;height:44px;background:var(--accent);color:#fff;border:none;border-radius:var(--r);font-size:13px;font-weight:600;display:flex;align-items:center;justify-content:center;gap:7px;transition:opacity .15s}
+.btn-pdf:hover{opacity:.88}
+.btn-pdf svg{width:15px;height:15px;fill:none;stroke:#fff;stroke-width:2}
+.btn-email{flex:1;height:44px;background:var(--surface);color:var(--accent);border:1px solid var(--aborder);border-radius:var(--r);font-size:13px;font-weight:600;display:flex;align-items:center;justify-content:center;gap:7px;transition:opacity .15s}
+.btn-email:hover{background:var(--adim)}
+.btn-email svg{width:15px;height:15px;fill:none;stroke:var(--accent);stroke-width:2}
+.btn-back{height:44px;padding:0 16px;background:var(--bg);color:var(--t2);border:1px solid var(--border);border-radius:var(--r);font-size:13px;font-weight:500;display:flex;align-items:center;gap:6px;transition:background .1s;white-space:nowrap}
+.btn-back:hover{background:var(--border)}
+.btn-back svg{width:14px;height:14px;fill:none;stroke:currentColor;stroke-width:2}
+
+/* ── MODAL (email) ── */
+.modal-overlay{position:fixed;inset:0;background:rgba(17,24,39,.4);z-index:50;display:flex;align-items:center;justify-content:center;padding:20px;opacity:0;pointer-events:none;transition:opacity .2s}
+.modal-overlay.show{opacity:1;pointer-events:all}
+.modal{background:var(--surface);border-radius:var(--rl);padding:24px;width:100%;max-width:420px;box-shadow:0 20px 60px rgba(0,0,0,.15)}
+.modal-title{font-size:15px;font-weight:600;margin-bottom:16px}
+.modal-label{font-size:11px;color:var(--t2);margin-bottom:5px;display:block}
+.modal-input{width:100%;height:40px;background:var(--bg);border:1.5px solid var(--border-s);border-radius:var(--r);padding:0 13px;font-size:13px;outline:none;transition:border-color .15s}
+.modal-input:focus{border-color:var(--accent);box-shadow:0 0 0 3px var(--adim)}
+.modal-btns{display:flex;gap:8px;margin-top:16px}
+.modal-send{flex:1;height:40px;background:var(--accent);color:#fff;border:none;border-radius:var(--r);font-size:13px;font-weight:600;transition:opacity .15s}
+.modal-send:hover{opacity:.88}
+.modal-cancel{height:40px;padding:0 16px;background:var(--bg);color:var(--t2);border:1px solid var(--border);border-radius:var(--r);font-size:13px}
+
+/* ── TOAST ── */
+.toast{position:fixed;bottom:20px;left:50%;transform:translateX(-50%) translateY(8px);background:var(--t1);color:#fff;border-radius:10px;padding:10px 16px;font-size:12px;display:flex;align-items:center;gap:8px;box-shadow:0 4px 16px rgba(0,0,0,.2);z-index:100;opacity:0;pointer-events:none;transition:opacity .2s,transform .2s;white-space:nowrap}
+.toast.show{opacity:1;transform:translateX(-50%) translateY(0)}
+.toast-dot{width:7px;height:7px;border-radius:50%;flex-shrink:0}
+
+@media print{.no-print{display:none!important}}
+</style>
+</head>
+<body>
+
+<!-- LOADING -->
+<div class="screen" id="screenLoad">
+  <div class="load-logo"><svg viewBox="0 0 24 24"><path d="M9 11l3 3L22 4"/><path d="M21 12v7a2 2 0 01-2 2H5a2 2 0 01-2-2V5a2 2 0 012-2h11"/></svg></div>
+  <div class="load-title">Verificador de Activos</div>
+  <div class="load-sub">Conectando con Fracttal-371...</div>
+  <div class="load-spin"></div>
+</div>
+
+<!-- START / HOME -->
+<div class="screen hidden" id="screenStart">
+  <div class="hdr">
+    <div class="hdr-logo"><svg viewBox="0 0 24 24"><path d="M9 11l3 3L22 4"/><path d="M21 12v7a2 2 0 01-2 2H5a2 2 0 01-2-2V5a2 2 0 012-2h11"/></svg></div>
+    <div class="hdr-title">Auditoría de Activos</div>
+    <div class="hdr-user">
+      <div class="hdr-avatar" id="hdrAvatar">DG</div>
+      <div class="hdr-uname" id="hdrUname">Diego Gutierrez</div>
+    </div>
+  </div>
+  <div class="start-wrap">
+    <!-- User greeting -->
+    <div class="start-greeting">
+      <div class="sg-avatar" id="sgAvatar">DG</div>
+      <div>
+        <div class="sg-name" id="sgName">Diego Gutierrez</div>
+        <div class="sg-email" id="sgEmail">diego.gutierrez@fracttal.com</div>
+        <div class="sg-role" id="sgRole">Administrator</div>
+      </div>
+    </div>
+
+    <!-- New session -->
+    <div class="card">
+      <div class="card-title">
+        <svg viewBox="0 0 24 24"><path d="M12 2C8.13 2 5 5.13 5 9c0 5.25 7 13 7 13s7-7.75 7-13c0-3.87-3.13-7-7-7z"/><circle cx="12" cy="9" r="2.5"/></svg>
+        Nueva sesión de auditoría
+      </div>
+      <div class="section-lbl">Ubicación principal</div>
+      <select class="loc-select" id="selL1" onchange="onL1Change()">
+        <option value="">— Selecciona ubicación —</option>
+      </select>
+      <select class="loc-select" id="selL2" style="display:none" onchange="onL2Change()"></select>
+      <select class="loc-select" id="selL3" style="display:none" onchange="onL3Change()"></select>
+      <select class="loc-select" id="selL4" style="display:none"></select>
+      <div id="locPreview" style="margin-top:10px;font-size:11px;color:var(--tm);min-height:16px"></div>
+      <button class="start-btn" id="btnStart" onclick="startSession()" disabled style="margin-top:14px">
+        <svg viewBox="0 0 24 24"><polygon points="5 3 19 12 5 21 5 3"/></svg>
+        Iniciar auditoría
+      </button>
+    </div>
+
+    <!-- Session history -->
+    <div class="section-lbl">Sesiones del día</div>
+    <div class="sess-list" id="sessList">
+      <div class="sess-empty">No hay sesiones registradas hoy</div>
+    </div>
+  </div>
+</div>
+
+<!-- AUDIT -->
+<div class="screen hidden" id="screenAudit">
+  <div class="hdr">
+    <div class="hdr-logo"><svg viewBox="0 0 24 24"><path d="M9 11l3 3L22 4"/><path d="M21 12v7a2 2 0 01-2 2H5a2 2 0 01-2-2V5a2 2 0 012-2h11"/></svg></div>
+    <div>
+      <div class="hdr-title" id="auditLocName" style="font-size:12px">Ubicación</div>
+      <div style="font-size:10px;color:var(--tm)" id="auditLocPath"></div>
+    </div>
+    <div class="hdr-user">
+      <div class="hdr-avatar" id="auditAvatar">DG</div>
+    </div>
+  </div>
+
+  <div class="audit-body">
+    <!-- COL CORRECTOS -->
+    <div class="audit-col">
+      <div class="col-hdr" style="background:#F0FDF4">
+        <div class="col-hdr-dot" style="background:var(--green)"></div>
+        <div class="col-hdr-title" style="color:var(--green)">Correctos</div>
+        <div class="col-hdr-cnt" id="cntOk" style="background:var(--gbg);color:var(--green);border:1px solid var(--gborder)">0</div>
+      </div>
+      <div class="col-items" id="colOk">
+        <div class="col-empty">
+          <svg viewBox="0 0 24 24"><path d="M22 11.08V12a10 10 0 11-5.93-9.14"/><polyline points="22 4 12 14.01 9 11.01"/></svg>
+          Aquí aparecerán los activos que corresponden a esta ubicación
+        </div>
+      </div>
+    </div>
+    <!-- COL INCORRECTOS -->
+    <div class="audit-col">
+      <div class="col-hdr" style="background:#FEF2F2">
+        <div class="col-hdr-dot" style="background:var(--red)"></div>
+        <div class="col-hdr-title" style="color:var(--red)">Fuera de lugar</div>
+        <div class="col-hdr-cnt" id="cntErr" style="background:var(--rbg);color:var(--red);border:1px solid var(--rborder)">0</div>
+      </div>
+      <div class="col-items" id="colErr">
+        <div class="col-empty">
+          <svg viewBox="0 0 24 24"><circle cx="12" cy="12" r="10"/><line x1="15" y1="9" x2="9" y2="15"/><line x1="9" y1="9" x2="15" y2="15"/></svg>
+          Aquí aparecerán activos que no pertenecen a esta ubicación
+        </div>
+      </div>
+    </div>
+  </div>
+
+  <div class="input-bar no-print">
+    <input class="audit-input" id="auditInp" type="text" placeholder="Código TAG del activo..." onkeydown="if(event.key==='Enter')auditVerify()" autocomplete="off" spellcheck="false"/>
+    <button class="btn-verify" onclick="auditVerify()">
+      <svg viewBox="0 0 24 24"><polyline points="20 6 9 17 4 12"/></svg>VERIFICAR
+    </button>
+    <button class="btn-close-sess" onclick="closeSession()">
+      <svg viewBox="0 0 24 24"><rect x="3" y="3" width="18" height="18" rx="2"/><line x1="9" y1="9" x2="15" y2="15"/><line x1="15" y1="9" x2="9" y2="15"/></svg>
+      Cerrar
+    </button>
+  </div>
+</div>
+
+<!-- DETAIL -->
+<div class="screen hidden" id="screenDetail">
+  <div class="hdr">
+    <button class="btn-back" onclick="showScreen('screenStart')" style="margin-left:0;border:none;background:none;padding:0;height:auto">
+      <svg viewBox="0 0 24 24"><polyline points="15 18 9 12 15 6"/></svg>
+      Volver
+    </button>
+    <div class="hdr-title" style="font-size:12px;margin-left:4px">Detalle de sesión</div>
+  </div>
+  <div class="detail-wrap" id="detailWrap"></div>
+</div>
+
+<!-- EMAIL MODAL -->
+<div class="modal-overlay" id="modalEmail">
+  <div class="modal">
+    <div class="modal-title">Enviar reporte por correo</div>
+    <label class="modal-label">Correo destinatario</label>
+    <input class="modal-input" id="emailTo" type="email" placeholder="ejemplo@empresa.com"/>
+    <div class="modal-btns">
+      <button class="modal-cancel" onclick="closeModal()">Cancelar</button>
+      <button class="modal-send" onclick="sendEmail()">Enviar reporte</button>
+    </div>
+  </div>
+</div>
+
+<div class="toast" id="toast"><div class="toast-dot" id="toastDot"></div><span id="toastMsg"></span></div>
+
+<script>
+// ══════════════════════════════════════════════
+//  DATOS — Fracttal-371 · A DEMO GUTCAL
+//  Sincronizado: 10 Jun 2026
+// ══════════════════════════════════════════════
+const TREE = [{
+  id:46128370,code:'GUTCAL',name:'A DEMO GUTCAL',path:'A DEMO GUTCAL',sel:false,kids:[
+    {id:46132261,code:'PCHEF',name:'FARQUI SRL',path:'A DEMO GUTCAL → FARQUI SRL',sel:false,kids:[
+      {id:46132271,code:'NPCHEF',name:'NAVE PRINCIPAL',path:'A DEMO GUTCAL → FARQUI SRL → NAVE PRINCIPAL',sel:true,kids:[
+        {id:46132282,code:'AACHEF',name:'ÁREA DE ALMACENAMIENTO',path:'A DEMO GUTCAL → FARQUI SRL → NAVE PRINCIPAL → ÁREA DE ALMACENAMIENTO',sel:true,kids:[]},
+        {id:46135128,code:'ADCHEF',name:'ÁREA DE DESPACHO',path:'A DEMO GUTCAL → FARQUI SRL → NAVE PRINCIPAL → ÁREA DE DESPACHO',sel:true,kids:[]},
+        {id:46132278,code:'APCHEF',name:'ÁREA PRODUCCIÓN',path:'A DEMO GUTCAL → FARQUI SRL → NAVE PRINCIPAL → ÁREA PRODUCCIÓN',sel:true,kids:[]},
+      ]},
+      {id:46209262,code:'',name:'Edificio Administrativo',path:'A DEMO GUTCAL → FARQUI SRL → Edificio Administrativo',sel:true,kids:[]},
+    ]},
+    {id:43621065,code:'BDP',name:'DEMO B',path:'A DEMO GUTCAL → DEMO B',sel:false,kids:[
+      {id:43621169,code:'GUTCALN1',name:'ZONA ESTE SANTA FE 443',path:'A DEMO GUTCAL → DEMO B → ZONA ESTE',sel:true,kids:[]},
+      {id:43621165,code:'GUTCALN2',name:'ZONA SUR SANTA FE 443',path:'A DEMO GUTCAL → DEMO B → ZONA SUR',sel:true,kids:[]},
+      {id:45493851,code:'',name:'DISTRITO NACIONAL',path:'A DEMO GUTCAL → DEMO B → DISTRITO NACIONAL',sel:true,kids:[
+        {id:47440669,code:'',name:'CLIENTE 1',path:'A DEMO GUTCAL → DEMO B → DISTRITO NACIONAL → CLIENTE 1',sel:true,kids:[]},
+        {id:47440670,code:'',name:'CLIENTE 2',path:'A DEMO GUTCAL → DEMO B → DISTRITO NACIONAL → CLIENTE 2',sel:true,kids:[]},
+        {id:45896047,code:'',name:'Oficina Central Matos',path:'A DEMO GUTCAL → DEMO B → DISTRITO NACIONAL → Oficina Central Matos',sel:true,kids:[]},
+      ]},
+      {id:45893750,code:'',name:'ZONA NORTE',path:'A DEMO GUTCAL → DEMO B → ZONA NORTE',sel:true,kids:[
+        {id:45893927,code:'',name:'SEDE CENTRAL BANCO POPULAR',path:'A DEMO GUTCAL → DEMO B → ZONA NORTE → SEDE CENTRAL BANCO POPULAR',sel:true,kids:[]},
+      ]},
+    ]},
+    {id:46030752,code:'Demomade',name:'DEMO MADESOL',path:'A DEMO GUTCAL → DEMO MADESOL',sel:false,kids:[
+      {id:46030852,code:'',name:'Planta Producción Santiago',path:'A DEMO GUTCAL → DEMO MADESOL → Planta Producción Santiago',sel:true,kids:[
+        {id:46030854,code:'',name:'Área de producción',path:'A DEMO GUTCAL → DEMO MADESOL → Planta Producción Santiago → Área de producción',sel:true,kids:[]},
+      ]},
+      {id:46030767,code:'',name:'Sede Santo Domingo',path:'A DEMO GUTCAL → DEMO MADESOL → Sede Santo Domingo',sel:true,kids:[]},
+      {id:46030769,code:'',name:'Sucursal Bavaro',path:'A DEMO GUTCAL → DEMO MADESOL → Sucursal Bavaro',sel:true,kids:[]},
+      {id:46030770,code:'',name:'Sucursal Santo Domingo Este',path:'A DEMO GUTCAL → DEMO MADESOL → Sucursal Sto. Domingo Este',sel:true,kids:[]},
+    ]},
+    {id:46128744,code:'EPS',name:'LOGISTICA',path:'A DEMO GUTCAL → LOGISTICA',sel:false,kids:[
+      {id:45493856,code:'EPSNORTE',name:'BM CARGO ZONA NORTE',path:'A DEMO GUTCAL → LOGISTICA → BM CARGO ZONA NORTE',sel:true,kids:[
+        {id:47439875,code:'',name:'FLOTA VEHICULOS REPARTO',path:'A DEMO GUTCAL → LOGISTICA → BM CARGO ZONA NORTE → FLOTA VEHICULOS REPARTO',sel:true,kids:[]},
+        {id:47439842,code:'',name:'SUCURSAL 1',path:'A DEMO GUTCAL → LOGISTICA → BM CARGO ZONA NORTE → SUCURSAL 1',sel:true,kids:[]},
+        {id:47439845,code:'',name:'SUCURSAL 2',path:'A DEMO GUTCAL → LOGISTICA → BM CARGO ZONA NORTE → SUCURSAL 2',sel:true,kids:[]},
+      ]},
+      {id:46128858,code:'EPSSUR',name:'BM CARGO ZONA SUR',path:'A DEMO GUTCAL → LOGISTICA → BM CARGO ZONA SUR',sel:true,kids:[]},
+    ]},
+    {id:48668103,code:'HCODEL',name:'Hotel CODELPA',path:'A DEMO GUTCAL → Hotel CODELPA',sel:false,kids:[
+      {id:48668106,code:'LP',name:'LOBBY PRINCIPAL',path:'A DEMO GUTCAL → Hotel CODELPA → LOBBY PRINCIPAL',sel:true,kids:[]},
+      {id:48668104,code:'TPC',name:'TORRE PUNTA CANA',path:'A DEMO GUTCAL → Hotel CODELPA → TORRE PUNTA CANA',sel:true,kids:[
+        {id:48668108,code:'H101',name:'H101',path:'A DEMO GUTCAL → Hotel CODELPA → TORRE PUNTA CANA → H101',sel:true,kids:[]},
+        {id:48668107,code:'H102',name:'H102',path:'A DEMO GUTCAL → Hotel CODELPA → TORRE PUNTA CANA → H102',sel:true,kids:[]},
+        {id:48668109,code:'H103',name:'H103',path:'A DEMO GUTCAL → Hotel CODELPA → TORRE PUNTA CANA → H103',sel:true,kids:[]},
+      ]},
+      {id:48668128,code:'TSD-CODELPA',name:'TORRE SANTO DOMINGO',path:'A DEMO GUTCAL → Hotel CODELPA → TORRE SANTO DOMINGO',sel:true,kids:[
+        {id:48668130,code:'TSD-H101',name:'H101',path:'A DEMO GUTCAL → Hotel CODELPA → TORRE SANTO DOMINGO → H101',sel:true,kids:[]},
+        {id:48668131,code:'TSD-H102',name:'H102',path:'A DEMO GUTCAL → Hotel CODELPA → TORRE SANTO DOMINGO → H102',sel:true,kids:[]},
+        {id:48668129,code:'TSD-H103',name:'H103',path:'A DEMO GUTCAL → Hotel CODELPA → TORRE SANTO DOMINGO → H103',sel:true,kids:[]},
+      ]},
+    ]},
+    {id:48538649,code:'',name:'OFICINA',path:'A DEMO GUTCAL → OFICINA',sel:true,kids:[
+      {id:48538652,code:'',name:'TERMINAL 1',path:'A DEMO GUTCAL → OFICINA → TERMINAL 1',sel:true,kids:[]},
+      {id:48538651,code:'',name:'TERMINAL 2',path:'A DEMO GUTCAL → OFICINA → TERMINAL 2',sel:true,kids:[]},
+      {id:48538654,code:'',name:'TERMINAL 3',path:'A DEMO GUTCAL → OFICINA → TERMINAL 3',sel:true,kids:[]},
+    ]},
+    {id:48538650,code:'',name:'AIRPORT SAN MARTIN',path:'A DEMO GUTCAL → AIRPORT SAN MARTIN',sel:true,kids:[
+      {id:48538656,code:'',name:'TERMINAL 1',path:'A DEMO GUTCAL → AIRPORT SAN MARTIN → TERMINAL 1',sel:true,kids:[]},
+      {id:48538653,code:'',name:'TERMINAL 2',path:'A DEMO GUTCAL → AIRPORT SAN MARTIN → TERMINAL 2',sel:true,kids:[]},
+      {id:48538655,code:'',name:'TERMINAL 3',path:'A DEMO GUTCAL → AIRPORT SAN MARTIN → TERMINAL 3',sel:true,kids:[]},
+    ]},
+    {id:46880614,code:'',name:'Ubicacion demo VPM',path:'A DEMO GUTCAL → Ubicacion demo VPM',sel:false,kids:[
+      {id:46880615,code:'',name:'Edificio Sede Principal',path:'A DEMO GUTCAL → Ubicacion demo VPM → Edificio Sede Principal',sel:true,kids:[]},
+      {id:46880616,code:'',name:'Edificio 1',path:'A DEMO GUTCAL → Ubicacion demo VPM → Edificio 1',sel:true,kids:[]},
+      {id:46880617,code:'',name:'Edificio 2',path:'A DEMO GUTCAL → Ubicacion demo VPM → Edificio 2',sel:true,kids:[]},
+      {id:46880619,code:'',name:'Edificio 3',path:'A DEMO GUTCAL → Ubicacion demo VPM → Edificio 3',sel:true,kids:[]},
+      {id:46880618,code:'',name:'Casas Siglo XVI',path:'A DEMO GUTCAL → Ubicacion demo VPM → Casas Siglo XVI',sel:true,kids:[]},
+    ]},
+  ]
+}];
+
+const ASSETS=[
+  {code:'MMCHEF',name:'MONTACARGAS',locId:46132282,locName:'ÁREA DE ALMACENAMIENTO',path:'FARQUI SRL → NAVE PRINCIPAL → ÁREA DE ALMACENAMIENTO'},
+  {code:'RICHEF',name:'REFRIGERADORA INDUSTRIAL',locId:46132282,locName:'ÁREA DE ALMACENAMIENTO',path:'FARQUI SRL → NAVE PRINCIPAL → ÁREA DE ALMACENAMIENTO'},
+  {code:'MACKANTHEM1',name:'CAMION MACK',locId:46135128,locName:'ÁREA DE DESPACHO',path:'FARQUI SRL → NAVE PRINCIPAL → ÁREA DE DESPACHO'},
+  {code:'EMBCHEF',name:'EMBUTIDORA',locId:46132278,locName:'ÁREA PRODUCCIÓN',path:'FARQUI SRL → NAVE PRINCIPAL → ÁREA PRODUCCIÓN'},
+  {code:'MEZCHEF',name:'MEZCLADORA',locId:46132278,locName:'ÁREA PRODUCCIÓN',path:'FARQUI SRL → NAVE PRINCIPAL → ÁREA PRODUCCIÓN'},
+  {code:'PCCHEF',name:'PICADORA DE CARNE',locId:46132278,locName:'ÁREA PRODUCCIÓN',path:'FARQUI SRL → NAVE PRINCIPAL → ÁREA PRODUCCIÓN'},
+  {code:'ROLAND306',name:'MAN-ROLAND 306',locId:43621169,locName:'ZONA ESTE SANTA FE 443',path:'DEMO B → ZONA ESTE SANTA FE 443'},
+  {code:'GUTCAL-SANDVICK-1',name:'TRITURADORA SANDVICK CH-430',locId:43621165,locName:'ZONA SUR SANTA FE 443',path:'DEMO B → ZONA SUR SANTA FE 443'},
+  {code:'HER-SEL-009',name:'TALADRO 3/4" 2-SPEED',locId:43621169,locName:'ZONA ESTE SANTA FE 443',path:'DEMO B → ZONA ESTE SANTA FE 443'},
+  {code:'MAXNOSJOB10',name:'CAMIONETA FORD',locId:47439875,locName:'FLOTA VEHICULOS REPARTO',path:'LOGISTICA → BM CARGO ZONA NORTE → FLOTA VEHICULOS REPARTO'},
+  {code:'TPC-H101-CQ',name:'CAMA QUEEN',locId:48668108,locName:'H101 (Torre Punta Cana)',path:'Hotel CODELPA → TORRE PUNTA CANA → H101'},
+  {code:'TPC-H102-CQ',name:'CAMA QUEEN',locId:48668107,locName:'H102 (Torre Punta Cana)',path:'Hotel CODELPA → TORRE PUNTA CANA → H102'},
+  {code:'TPC-H103-CQ',name:'CAMA QUEEN',locId:48668109,locName:'H103 (Torre Punta Cana)',path:'Hotel CODELPA → TORRE PUNTA CANA → H103'},
+  {code:'TPC-H101-TELF',name:'TELÉFONO',locId:48668108,locName:'H101 (Torre Punta Cana)',path:'Hotel CODELPA → TORRE PUNTA CANA → H101'},
+  {code:'TPC-H102-TELF',name:'TELÉFONO',locId:48668107,locName:'H102 (Torre Punta Cana)',path:'Hotel CODELPA → TORRE PUNTA CANA → H102'},
+  {code:'TPC-H103-TELF',name:'TELÉFONO',locId:48668109,locName:'H103 (Torre Punta Cana)',path:'Hotel CODELPA → TORRE PUNTA CANA → H103'},
+  {code:'TPC-H101-TV50',name:'TELEVISOR 50"',locId:48668108,locName:'H101 (Torre Punta Cana)',path:'Hotel CODELPA → TORRE PUNTA CANA → H101'},
+  {code:'TPC-H102-TV50',name:'TELEVISOR 50"',locId:48668107,locName:'H102 (Torre Punta Cana)',path:'Hotel CODELPA → TORRE PUNTA CANA → H102'},
+  {code:'TPC-H103-TV50',name:'TELEVISOR 50"',locId:48668109,locName:'H103 (Torre Punta Cana)',path:'Hotel CODELPA → TORRE PUNTA CANA → H103'},
+  {code:'TSD-H101-CQ',name:'CAMA QUEEN',locId:48668130,locName:'H101 (Torre Santo Domingo)',path:'Hotel CODELPA → TORRE SANTO DOMINGO → H101'},
+  {code:'TSD-H102-CQ',name:'CAMA QUEEN',locId:48668131,locName:'H102 (Torre Santo Domingo)',path:'Hotel CODELPA → TORRE SANTO DOMINGO → H102'},
+  {code:'TSD-H103-CQ',name:'CAMA QUEEN',locId:48668129,locName:'H103 (Torre Santo Domingo)',path:'Hotel CODELPA → TORRE SANTO DOMINGO → H103'},
+  {code:'TSD-H101-TELF',name:'TELÉFONO',locId:48668130,locName:'H101 (Torre Santo Domingo)',path:'Hotel CODELPA → TORRE SANTO DOMINGO → H101'},
+  {code:'TSD-H102-TELF',name:'TELÉFONO',locId:48668131,locName:'H102 (Torre Santo Domingo)',path:'Hotel CODELPA → TORRE SANTO DOMINGO → H102'},
+  {code:'TSD-H103-TELF',name:'TELÉFONO',locId:48668129,locName:'H103 (Torre Santo Domingo)',path:'Hotel CODELPA → TORRE SANTO DOMINGO → H103'},
+  {code:'TSD-H101-TV50',name:'TELEVISOR 50"',locId:48668130,locName:'H101 (Torre Santo Domingo)',path:'Hotel CODELPA → TORRE SANTO DOMINGO → H101'},
+  {code:'TSD-H102-TV50',name:'TELEVISOR 50"',locId:48668131,locName:'H102 (Torre Santo Domingo)',path:'Hotel CODELPA → TORRE SANTO DOMINGO → H102'},
+  {code:'TSD-H103-TV50',name:'TELEVISOR 50"',locId:48668129,locName:'H103 (Torre Santo Domingo)',path:'Hotel CODELPA → TORRE SANTO DOMINGO → H103'},
+];
+const AIDX={};
+ASSETS.forEach(a=>{if(a.code&&!AIDX[a.code.toUpperCase()])AIDX[a.code.toUpperCase()]=a;});
+
+// ══════════════════════════════════════════════
+//  STATE
+// ══════════════════════════════════════════════
+let user = { name:'Diego Gutierrez', email:'diego.gutierrez@fracttal.com', role:'Administrator' };
+let sessions = [];       // todas las sesiones del día
+let activeSession = null; // sesión en curso
+let viewSession = null;   // sesión vista en detalle
+
+// ══════════════════════════════════════════════
+//  INIT — simula detección de usuario Fracttal
+// ══════════════════════════════════════════════
+window.addEventListener('DOMContentLoaded', () => {
+  setTimeout(() => {
+    applyUser(user);
+    buildLocationPicker();
+    renderSessionList();
+    showScreen('screenStart');
+  }, 1400);
+});
+
+function applyUser(u) {
+  const initials = u.name.split(' ').slice(0,2).map(w=>w[0]).join('').toUpperCase();
+  ['hdrAvatar','auditAvatar','sgAvatar'].forEach(id=>{ const el=document.getElementById(id); if(el) el.textContent=initials; });
+  const uname = document.getElementById('hdrUname'); if(uname) uname.textContent=u.name;
+  const sn=document.getElementById('sgName'); if(sn) sn.textContent=u.name;
+  const se=document.getElementById('sgEmail'); if(se) se.textContent=u.email;
+  const sr=document.getElementById('sgRole'); if(sr) sr.textContent=u.role;
+}
+
+// ══════════════════════════════════════════════
+//  LOCATION PICKER (cascada 4 niveles)
+// ══════════════════════════════════════════════
+const levels = [null, null, null, null]; // nodos seleccionados por nivel
+
+function getAllSelectableNodes(nodes) {
+  let result = [];
+  nodes.forEach(n => {
+    if (!n.sel || n.kids.length > 0) result.push(n); // include parents for navigation
+    else result.push(n);
+    if (n.kids.length) result = result.concat(getAllSelectableNodes(n.kids));
+  });
+  return result;
+}
+
+function buildLocationPicker() {
+  const s1 = document.getElementById('selL1');
+  // Level 1: children of root (46128370)
+  const root = TREE[0];
+  root.kids.forEach(n => {
+    const opt = document.createElement('option');
+    opt.value = n.id;
+    opt.textContent = n.name;
+    s1.appendChild(opt);
+  });
+}
+
+function findNodeById(id, nodes) {
+  for (const n of nodes) {
+    if (n.id == id) return n;
+    if (n.kids.length) { const f = findNodeById(id, n.kids); if (f) return f; }
+  }
+  return null;
+}
+
+function populateSelect(selEl, nodes, placeholder) {
+  selEl.innerHTML = `<option value="">${placeholder}</option>`;
+  nodes.forEach(n => {
+    const opt = document.createElement('option');
+    opt.value = n.id;
+    opt.textContent = n.name + (n.kids.length ? ' ▸' : '');
+    selEl.appendChild(opt);
+  });
+  selEl.style.display = 'block';
+}
+
+function onL1Change() {
+  const id = document.getElementById('selL1').value;
+  levels[0] = id ? findNodeById(parseInt(id), TREE) : null;
+  ['selL2','selL3','selL4'].forEach(s => { const el=document.getElementById(s); el.innerHTML=''; el.style.display='none'; });
+  levels[1]=levels[2]=levels[3]=null;
+  if (levels[0] && levels[0].kids.length) populateSelect(document.getElementById('selL2'), levels[0].kids, '— Sub-ubicación —');
+  updateLocPreview();
+}
+function onL2Change() {
+  const id = document.getElementById('selL2').value;
+  levels[1] = id ? findNodeById(parseInt(id), TREE) : null;
+  ['selL3','selL4'].forEach(s => { const el=document.getElementById(s); el.innerHTML=''; el.style.display='none'; });
+  levels[2]=levels[3]=null;
+  if (levels[1] && levels[1].kids.length) populateSelect(document.getElementById('selL3'), levels[1].kids, '— Sub-ubicación —');
+  updateLocPreview();
+}
+function onL3Change() {
+  const id = document.getElementById('selL3').value;
+  levels[2] = id ? findNodeById(parseInt(id), TREE) : null;
+  const s4=document.getElementById('selL4'); s4.innerHTML=''; s4.style.display='none';
+  levels[3]=null;
+  if (levels[2] && levels[2].kids.length) populateSelect(document.getElementById('selL4'), levels[2].kids, '— Sub-ubicación —');
+  updateLocPreview();
+}
+
+function getSelectedNode() {
+  // Return deepest selected node that is selectable
+  for (let i = 3; i >= 0; i--) {
+    if (levels[i] && levels[i].sel) return levels[i];
+  }
+  // If deepest is a parent with kids not selected yet, return null
+  for (let i = 3; i >= 0; i--) {
+    if (levels[i]) return levels[i].sel ? levels[i] : null;
+  }
+  return null;
+}
+
+function updateLocPreview() {
+  const n = getSelectedNode();
+  const prev = document.getElementById('locPreview');
+  const btn = document.getElementById('btnStart');
+  if (n) {
+    prev.innerHTML = `<span style="color:var(--accent);font-weight:500">📍 ${n.path}</span>`;
+    btn.disabled = false;
+  } else {
+    // Check if any level is selected
+    const anySelected = levels.some(l => l !== null);
+    if (anySelected) {
+      const last = levels.filter(l=>l).pop();
+      if (last && last.kids.length) {
+        prev.textContent = 'Selecciona una sub-ubicación específica';
+        btn.disabled = true;
+      } else {
+        prev.textContent = '';
+        btn.disabled = true;
+      }
+    } else {
+      prev.textContent = '';
+      btn.disabled = true;
+    }
+  }
+}
+
+// ══════════════════════════════════════════════
+//  SESSIONS
+// ══════════════════════════════════════════════
+function startSession() {
+  const node = getSelectedNode();
+  if (!node) return;
+
+  // If there's an active session, close it first
+  if (activeSession && !activeSession.closedAt) {
+    activeSession.closedAt = new Date().toLocaleTimeString('es-MX',{hour:'2-digit',minute:'2-digit'});
+  }
+
+  activeSession = {
+    id: Date.now(),
+    locId: node.id,
+    locName: node.name,
+    locPath: node.path,
+    auditor: user.name,
+    auditorEmail: user.email,
+    startedAt: new Date().toLocaleTimeString('es-MX',{hour:'2-digit',minute:'2-digit'}),
+    date: new Date().toLocaleDateString('es-MX',{day:'2-digit',month:'short',year:'numeric'}),
+    closedAt: null,
+    ok: [],   // activos correctos
+    err: [],  // activos incorrectos
+    warn: [], // no encontrados
+  };
+  sessions.unshift(activeSession);
+
+  // Update audit header
+  document.getElementById('auditLocName').textContent = node.name;
+  document.getElementById('auditLocPath').textContent = node.path;
+
+  // Clear columns
+  document.getElementById('colOk').innerHTML = `<div class="col-empty"><svg viewBox="0 0 24 24"><path d="M22 11.08V12a10 10 0 11-5.93-9.14"/><polyline points="22 4 12 14.01 9 11.01"/></svg>Aquí aparecerán los activos que corresponden a esta ubicación</div>`;
+  document.getElementById('colErr').innerHTML = `<div class="col-empty"><svg viewBox="0 0 24 24"><circle cx="12" cy="12" r="10"/><line x1="15" y1="9" x2="9" y2="15"/><line x1="9" y1="9" x2="15" y2="15"/></svg>Aquí aparecerán activos que no pertenecen a esta ubicación</div>`;
+  document.getElementById('cntOk').textContent = '0';
+  document.getElementById('cntErr').textContent = '0';
+
+  showScreen('screenAudit');
+  setTimeout(() => document.getElementById('auditInp')?.focus(), 100);
+}
+
+function closeSession() {
+  if (!activeSession) return;
+  activeSession.closedAt = new Date().toLocaleTimeString('es-MX',{hour:'2-digit',minute:'2-digit'});
+  renderSessionList();
+  showScreen('screenStart');
+}
+
+function renderSessionList() {
+  const el = document.getElementById('sessList');
+  if (!sessions.length) {
+    el.innerHTML = '<div class="sess-empty">No hay sesiones registradas hoy</div>';
+    return;
+  }
+  el.innerHTML = sessions.map(s => {
+    const total = s.ok.length + s.err.length;
+    const isOpen = !s.closedAt;
+    const dotColor = isOpen ? 'var(--accent)' : s.err.length > 0 ? 'var(--amber)' : 'var(--green)';
+    return `<div class="sess-item" onclick="viewSessionDetail(${s.id})">
+      <div class="sess-dot" style="background:${dotColor}"></div>
+      <div class="sess-info">
+        <div class="sess-loc">${s.locName}</div>
+        <div class="sess-meta">${s.date} · ${s.startedAt}${s.closedAt?' → '+s.closedAt:' · En curso'} · ${s.auditor}</div>
+      </div>
+      <div class="sess-counts">
+        <div class="sess-badge sb-ok">✓ ${s.ok.length}</div>
+        <div class="sess-badge sb-err">✗ ${s.err.length}</div>
+      </div>
+    </div>`;
+  }).join('');
+}
+
+// ══════════════════════════════════════════════
+//  VERIFY
+// ══════════════════════════════════════════════
+function ancestors(id, nodes) {
+  for (const n of nodes) {
+    if (n.id === id) return [n.id];
+    if (n.kids.length) { const a = ancestors(id, n.kids); if (a) return [n.id, ...a]; }
+  }
+  return null;
+}
+function isCorrect(assetLocId, selId) {
+  if (!assetLocId) return false;
+  if (assetLocId === selId) return true;
+  const a = ancestors(assetLocId, TREE);
+  return a ? a.includes(selId) : false;
+}
+
+function auditVerify() {
+  if (!activeSession) return;
+  const inp = document.getElementById('auditInp');
+  const raw = (inp.value||'').trim(); if (!raw) return;
+  const key = raw.toUpperCase();
+  const asset = AIDX[key];
+  const time = new Date().toLocaleTimeString('es-MX',{hour:'2-digit',minute:'2-digit'});
+  inp.value = '';
+
+  let entry;
+  if (!asset) {
+    entry = { code:raw, name:'Código no registrado', status:'warn', locName:'—', locPath:'No encontrado en el sistema', time };
+    activeSession.warn.push(entry);
+    // Show in err column with amber style
+    addCardToCol('colErr', entry, 'warn');
+  } else {
+    const ok = isCorrect(asset.locId, activeSession.locId);
+    entry = { code:raw, name:asset.name, status:ok?'ok':'err', locName:asset.locName, locPath:asset.path, time };
+    if (ok) {
+      activeSession.ok.push(entry);
+      addCardToCol('colOk', entry, 'ok');
+    } else {
+      activeSession.err.push(entry);
+      addCardToCol('colErr', entry, 'err');
+    }
+  }
+  document.getElementById('cntOk').textContent = activeSession.ok.length;
+  document.getElementById('cntErr').textContent = activeSession.err.length + activeSession.warn.length;
+  inp.focus();
+}
+
+function addCardToCol(colId, entry, status) {
+  const col = document.getElementById(colId);
+  // Remove empty placeholder if present
+  const empty = col.querySelector('.col-empty');
+  if (empty) empty.remove();
+
+  const colors = {
+    ok:  { dot:'var(--green)', locColor:'var(--t2)' },
+    err: { dot:'var(--red)',   locColor:'var(--red)' },
+    warn:{ dot:'var(--amber)', locColor:'var(--amber)' },
+  };
+  const c = colors[status];
+  const card = document.createElement('div');
+  card.className = 'asset-card';
+  card.style.borderLeft = `3px solid ${c.dot}`;
+  card.innerHTML = `
+    <div class="ac-code">TAG: ${entry.code}</div>
+    <div class="ac-name">${entry.name}</div>
+    <div class="ac-loc" style="color:${c.locColor}">
+      <svg viewBox="0 0 24 24"><path d="M12 2C8.13 2 5 5.13 5 9c0 5.25 7 13 7 13s7-7.75 7-13c0-3.87-3.13-7-7-7z"/><circle cx="12" cy="9" r="2"/></svg>
+      ${status==='ok'?'Ubicación correcta':entry.locPath}
+    </div>
+    <div class="ac-time">${entry.time}</div>`;
+  col.prepend(card);
+}
+
+// ══════════════════════════════════════════════
+//  SESSION DETAIL
+// ══════════════════════════════════════════════
+function viewSessionDetail(id) {
+  viewSession = sessions.find(s => s.id === id);
+  if (!viewSession) return;
+  renderDetail();
+  showScreen('screenDetail');
+}
+
+function renderDetail() {
+  const s = viewSession;
+  const wrap = document.getElementById('detailWrap');
+  const total = s.ok.length + s.err.length + s.warn.length;
+  const pct = total > 0 ? Math.round((s.ok.length/total)*100) : 0;
+
+  const okRows = s.ok.length
+    ? s.ok.map(e => `<div class="detail-asset-row">
+        <div class="dar-dot" style="background:var(--green)"></div>
+        <div class="dar-body">
+          <div class="dar-code">TAG: ${e.code}</div>
+          <div class="dar-name">${e.name}</div>
+          <div class="dar-loc">✓ Ubicación correcta</div>
+          <div class="dar-time">${e.time}</div>
+        </div>
+      </div>`).join('')
+    : '<div class="col-none">Sin activos correctos</div>';
+
+  const errRows = [...s.err, ...s.warn].length
+    ? [...s.err, ...s.warn].map(e => `<div class="detail-asset-row">
+        <div class="dar-dot" style="background:${e.status==='warn'?'var(--amber)':'var(--red)'}"></div>
+        <div class="dar-body">
+          <div class="dar-code">TAG: ${e.code}</div>
+          <div class="dar-name">${e.name}</div>
+          <div class="dar-loc" style="color:${e.status==='warn'?'var(--amber)':'var(--red)'}">→ ${e.locPath}</div>
+          <div class="dar-time">${e.time}</div>
+        </div>
+      </div>`).join('')
+    : '<div class="col-none">Sin activos fuera de lugar</div>';
+
+  wrap.innerHTML = `
+    <div class="detail-meta">
+      <div class="dm-row"><div class="dm-label">Ubicación</div><div class="dm-value">${s.locName}</div></div>
+      <div class="dm-row"><div class="dm-label">Ruta</div><div class="dm-value" style="font-size:11px;color:var(--tm)">${s.locPath}</div></div>
+      <div class="dm-row"><div class="dm-label">Auditor</div><div class="dm-value">${s.auditor}</div></div>
+      <div class="dm-row"><div class="dm-label">Fecha</div><div class="dm-value">${s.date}</div></div>
+      <div class="dm-row"><div class="dm-label">Horario</div><div class="dm-value">${s.startedAt}${s.closedAt?' → '+s.closedAt:' (en curso)'}</div></div>
+      <div class="dm-row"><div class="dm-label">Resultado</div>
+        <div class="dm-status">
+          <div class="dm-badge sb-ok">✓ ${s.ok.length} correctos</div>
+          <div class="dm-badge sb-err">✗ ${s.err.length+s.warn.length} incorrectos</div>
+          <div class="dm-badge" style="background:var(--adim);color:var(--accent);border:1px solid var(--aborder)">${pct}% OK</div>
+        </div>
+      </div>
+    </div>
+
+    <div class="detail-cols">
+      <div>
+        <div class="detail-col-hdr" style="background:#F0FDF4;color:var(--green)">✓ Correctos (${s.ok.length})</div>
+        <div class="detail-col-body">${okRows}</div>
+      </div>
+      <div>
+        <div class="detail-col-hdr" style="background:#FEF2F2;color:var(--red)">✗ Fuera de lugar (${s.err.length+s.warn.length})</div>
+        <div class="detail-col-body">${errRows}</div>
+      </div>
+    </div>
+
+    <div class="action-btns no-print">
+      <button class="btn-back" onclick="showScreen('screenStart')">
+        <svg viewBox="0 0 24 24"><polyline points="15 18 9 12 15 6"/></svg>Volver
+      </button>
+      <button class="btn-pdf" onclick="downloadPDF()">
+        <svg viewBox="0 0 24 24"><path d="M14 2H6a2 2 0 00-2 2v16a2 2 0 002 2h12a2 2 0 002-2V8z"/><polyline points="14 2 14 8 20 8"/><line x1="12" y1="18" x2="12" y2="12"/><line x1="9" y1="15" x2="15" y2="15"/></svg>
+        Descargar PDF
+      </button>
+      <button class="btn-email" onclick="openModal()">
+        <svg viewBox="0 0 24 24"><path d="M4 4h16c1.1 0 2 .9 2 2v12c0 1.1-.9 2-2 2H4c-1.1 0-2-.9-2-2V6c0-1.1.9-2 2-2z"/><polyline points="22,6 12,13 2,6"/></svg>
+        Enviar por correo
+      </button>
+    </div>`;
+}
+
+// ══════════════════════════════════════════════
+//  PDF
+// ══════════════════════════════════════════════
+function downloadPDF() {
+  const s = viewSession;
+  if (!s) return;
+  const total = s.ok.length + s.err.length + s.warn.length;
+  const pct = total > 0 ? Math.round((s.ok.length/total)*100) : 0;
+
+  const okHTML = s.ok.map(e=>`
+    <tr style="border-bottom:1px solid #E5E7EB">
+      <td style="padding:8px 10px;font-family:monospace;font-size:11px;color:#6B7280">${e.code}</td>
+      <td style="padding:8px 10px;font-size:12px;font-weight:600">${e.name}</td>
+      <td style="padding:8px 10px;font-size:11px;color:#059669">✓ Correcto</td>
+      <td style="padding:8px 10px;font-size:11px;color:#9CA3AF">${e.time}</td>
+    </tr>`).join('');
+
+  const errHTML = [...s.err,...s.warn].map(e=>`
+    <tr style="border-bottom:1px solid #E5E7EB">
+      <td style="padding:8px 10px;font-family:monospace;font-size:11px;color:#6B7280">${e.code}</td>
+      <td style="padding:8px 10px;font-size:12px;font-weight:600">${e.name}</td>
+      <td style="padding:8px 10px;font-size:11px;color:${e.status==='warn'?'#D97706':'#DC2626'}">${e.locPath}</td>
+      <td style="padding:8px 10px;font-size:11px;color:#9CA3AF">${e.time}</td>
+    </tr>`).join('');
+
+  const html = `<!DOCTYPE html><html lang="es"><head><meta charset="UTF-8">
+  <title>Auditoría ${s.locName} — ${s.date}</title>
+  <style>
+    body{font-family:Arial,sans-serif;color:#111827;padding:32px;font-size:13px}
+    h1{font-size:20px;font-weight:700;margin-bottom:4px;color:#111827}
+    h2{font-size:13px;font-weight:700;text-transform:uppercase;letter-spacing:.06em;color:#6B7280;margin:20px 0 8px}
+    .meta{background:#F9FAFB;border:1px solid #E5E7EB;border-radius:8px;padding:14px;margin-bottom:20px;display:grid;grid-template-columns:1fr 1fr;gap:8px}
+    .meta-item{font-size:12px}.meta-label{color:#9CA3AF;font-size:10px;text-transform:uppercase;letter-spacing:.06em;margin-bottom:2px}
+    .badges{display:flex;gap:8px;flex-wrap:wrap}
+    .badge{font-size:11px;font-weight:700;padding:3px 10px;border-radius:20px}
+    .b-ok{background:#ECFDF5;color:#059669;border:1px solid #A7F3D0}
+    .b-err{background:#FEF2F2;color:#DC2626;border:1px solid #FECACA}
+    .b-pct{background:#EEF2FF;color:#3B5BDB;border:1px solid #C7D2FE}
+    table{width:100%;border-collapse:collapse;font-size:12px}
+    th{padding:8px 10px;text-align:left;background:#F9FAFB;font-size:10px;text-transform:uppercase;letter-spacing:.06em;color:#6B7280;border-bottom:2px solid #E5E7EB}
+    @media print{body{padding:16px}}
+  </style></head><body>
+  <h1>Reporte de Auditoría</h1>
+  <div style="font-size:12px;color:#6B7280;margin-bottom:16px">A DEMO GUTCAL · Fracttal-371</div>
+  <div class="meta">
+    <div class="meta-item"><div class="meta-label">Ubicación</div>${s.locName}</div>
+    <div class="meta-item"><div class="meta-label">Ruta</div><span style="color:#9CA3AF;font-size:11px">${s.locPath}</span></div>
+    <div class="meta-item"><div class="meta-label">Auditor</div>${s.auditor} · ${s.auditorEmail}</div>
+    <div class="meta-item"><div class="meta-label">Fecha y hora</div>${s.date} · ${s.startedAt}${s.closedAt?' → '+s.closedAt:''}</div>
+    <div class="meta-item" style="grid-column:1/-1"><div class="meta-label">Resumen</div>
+      <div class="badges">
+        <div class="badge b-ok">✓ ${s.ok.length} correctos</div>
+        <div class="badge b-err">✗ ${s.err.length+s.warn.length} fuera de lugar</div>
+        <div class="badge b-pct">${pct}% en orden</div>
+      </div>
+    </div>
+  </div>
+  ${s.ok.length?`<h2>Activos correctos (${s.ok.length})</h2>
+  <table><thead><tr><th>Código</th><th>Activo</th><th>Estado</th><th>Hora</th></tr></thead><tbody>${okHTML}</tbody></table>`:''}
+  ${(s.err.length+s.warn.length)?`<h2 style="margin-top:24px">Activos fuera de lugar (${s.err.length+s.warn.length})</h2>
+  <table><thead><tr><th>Código</th><th>Activo</th><th>Ubicación correcta</th><th>Hora</th></tr></thead><tbody>${errHTML}</tbody></table>`:''}
+  <div style="margin-top:32px;font-size:10px;color:#9CA3AF;border-top:1px solid #E5E7EB;padding-top:12px">
+    Generado el ${new Date().toLocaleString('es-MX')} · Verificador de Activos GUTCAL · Fracttal-371
+  </div>
+  </body></html>`;
+
+  const blob = new Blob([html], {type:'text/html'});
+  const url = URL.createObjectURL(blob);
+  const a = document.createElement('a');
+  a.href = url;
+  a.download = `auditoria_${s.locName.replace(/\s+/g,'_')}_${s.date.replace(/\s+/g,'')}.html`;
+  a.click();
+  URL.revokeObjectURL(url);
+  showToast('Reporte descargado — ábrelo en el navegador e imprime como PDF', false);
+}
+
+// ══════════════════════════════════════════════
+//  EMAIL MODAL
+// ══════════════════════════════════════════════
+function openModal() {
+  document.getElementById('emailTo').value = '';
+  document.getElementById('modalEmail').classList.add('show');
+}
+function closeModal() {
+  document.getElementById('modalEmail').classList.remove('show');
+}
+function sendEmail() {
+  const to = document.getElementById('emailTo').value.trim();
+  if (!to || !to.includes('@')) { showToast('Ingresa un correo válido', true); return; }
+  const s = viewSession;
+  if (!s) return;
+  const total = s.ok.length + s.err.length + s.warn.length;
+  const pct = total > 0 ? Math.round((s.ok.length/total)*100) : 0;
+
+  // Build mailto with summary
+  const subject = encodeURIComponent(`Auditoría ${s.locName} — ${s.date}`);
+  const body = encodeURIComponent(
+`REPORTE DE AUDITORÍA — A DEMO GUTCAL
+=====================================
+Ubicación: ${s.locPath}
+Auditor: ${s.auditor} (${s.auditorEmail})
+Fecha: ${s.date} · ${s.startedAt}${s.closedAt?' → '+s.closedAt:''}
+Resultado: ${s.ok.length} correctos · ${s.err.length+s.warn.length} fuera de lugar · ${pct}% en orden
+
+ACTIVOS CORRECTOS (${s.ok.length}):
+${s.ok.map(e=>`  • [${e.code}] ${e.name} — ${e.time}`).join('\n')||'  (ninguno)'}
+
+ACTIVOS FUERA DE LUGAR (${s.err.length+s.warn.length}):
+${[...s.err,...s.warn].map(e=>`  • [${e.code}] ${e.name} → Debe estar en: ${e.locPath}`).join('\n')||'  (ninguno)'}
+
+---
+Generado por Verificador de Activos GUTCAL · Fracttal-371`);
+
+  window.open(`mailto:${to}?subject=${subject}&body=${body}`);
+  closeModal();
+  showToast(`Abriendo cliente de correo para ${to}`, false);
+}
+
+// ══════════════════════════════════════════════
+//  SCREEN NAV & UTILS
+// ══════════════════════════════════════════════
+function showScreen(id) {
+  document.querySelectorAll('.screen').forEach(s => s.classList.add('hidden'));
+  document.getElementById(id).classList.remove('hidden');
+  if (id === 'screenStart') renderSessionList();
+}
+
+function showToast(msg, isErr) {
+  const t=document.getElementById('toast'),d=document.getElementById('toastDot'),m=document.getElementById('toastMsg');
+  d.style.background = isErr ? 'var(--amber)' : 'var(--green)';
+  m.textContent = msg;
+  t.classList.add('show');
+  setTimeout(()=>t.classList.remove('show'), 3500);
+}
+</script>
+</body>
+</html>
