@@ -1,3 +1,4 @@
+
 <!DOCTYPE html>
 <html lang="es">
 <head>
@@ -171,10 +172,35 @@ input,select{font-family:inherit}
 .toast-dot{width:7px;height:7px;border-radius:50%;flex-shrink:0}
 
 @media print{.no-print{display:none!important}}
+
+/* ── QR SCANNER ── */
+.btn-qr{height:40px;width:42px;background:var(--surface);border:1.5px solid var(--border-s);border-radius:var(--r);display:flex;align-items:center;justify-content:center;flex-shrink:0;transition:border-color .15s,background .15s;cursor:pointer}
+.btn-qr:hover{border-color:var(--accent);background:var(--adim)}
+.btn-qr.active{border-color:var(--accent);background:var(--adim)}
+.btn-qr svg{width:18px;height:18px;fill:none;stroke:var(--accent);stroke-width:2}
+
+.qr-overlay{position:fixed;inset:0;background:rgba(0,0,0,.75);z-index:60;display:flex;flex-direction:column;align-items:center;justify-content:center;padding:20px;opacity:0;pointer-events:none;transition:opacity .2s}
+.qr-overlay.show{opacity:1;pointer-events:all}
+.qr-box{background:var(--surface);border-radius:var(--rl);width:100%;max-width:360px;overflow:hidden}
+.qr-hdr{padding:14px 16px;border-bottom:1px solid var(--border);display:flex;align-items:center;gap:8px}
+.qr-hdr-title{font-size:13px;font-weight:600;flex:1}
+.qr-close{width:28px;height:28px;border-radius:6px;border:none;background:var(--bg);display:flex;align-items:center;justify-content:center;cursor:pointer}
+.qr-close svg{width:14px;height:14px;fill:none;stroke:var(--t2);stroke-width:2.5}
+.qr-body{padding:16px}
+#qr-reader{width:100%;border-radius:var(--r);overflow:hidden;background:#000}
+#qr-reader video{width:100%!important;border-radius:var(--r)}
+#qr-reader img{display:none!important}
+#qr-reader__dashboard{display:none!important}
+.qr-manual-sep{display:flex;align-items:center;gap:8px;margin:12px 0;font-size:11px;color:var(--tm)}
+.qr-manual-sep::before,.qr-manual-sep::after{content:'';flex:1;height:1px;background:var(--border)}
+.qr-status{margin-top:10px;font-size:11px;color:var(--tm);text-align:center;min-height:16px}
+.qr-status.ok{color:var(--green);font-weight:500}
+.qr-status.err{color:var(--red)}
 </style>
 </head>
 <body>
 
+<script src="https://unpkg.com/html5-qrcode@2.3.8/html5-qrcode.min.js"></script>
 <!-- LOADING -->
 <div class="screen" id="screenLoad">
   <div class="load-logo"><svg viewBox="0 0 24 24"><path d="M9 11l3 3L22 4"/><path d="M21 12v7a2 2 0 01-2 2H5a2 2 0 01-2-2V5a2 2 0 012-2h11"/></svg></div>
@@ -277,7 +303,10 @@ input,select{font-family:inherit}
   </div>
 
   <div class="input-bar no-print">
-    <input class="audit-input" id="auditInp" type="text" placeholder="Código TAG del activo..." onkeydown="if(event.key==='Enter')auditVerify()" autocomplete="off" spellcheck="false"/>
+    <button class="btn-qr" id="btnQR" onclick="openQR()" title="Escanear QR">
+      <svg viewBox="0 0 24 24"><rect x="3" y="3" width="7" height="7"/><rect x="14" y="3" width="7" height="7"/><rect x="3" y="14" width="7" height="7"/><rect x="14" y="14" width="3" height="3"/></svg>
+    </button>
+    <input class="audit-input" id="auditInp" type="text" placeholder="Código TAG del activo o escanea el QR..." onkeydown="if(event.key==='Enter')auditVerify()" autocomplete="off" spellcheck="false"/>
     <button class="btn-verify" onclick="auditVerify()">
       <svg viewBox="0 0 24 24"><polyline points="20 6 9 17 4 12"/></svg>VERIFICAR
     </button>
@@ -832,7 +861,31 @@ function downloadPDF() {
     table{width:100%;border-collapse:collapse;font-size:12px}
     th{padding:8px 10px;text-align:left;background:#F9FAFB;font-size:10px;text-transform:uppercase;letter-spacing:.06em;color:#6B7280;border-bottom:2px solid #E5E7EB}
     @media print{body{padding:16px}}
-  </style></head><body>
+  
+/* ── QR SCANNER ── */
+.btn-qr{height:40px;width:42px;background:var(--surface);border:1.5px solid var(--border-s);border-radius:var(--r);display:flex;align-items:center;justify-content:center;flex-shrink:0;transition:border-color .15s,background .15s;cursor:pointer}
+.btn-qr:hover{border-color:var(--accent);background:var(--adim)}
+.btn-qr.active{border-color:var(--accent);background:var(--adim)}
+.btn-qr svg{width:18px;height:18px;fill:none;stroke:var(--accent);stroke-width:2}
+
+.qr-overlay{position:fixed;inset:0;background:rgba(0,0,0,.75);z-index:60;display:flex;flex-direction:column;align-items:center;justify-content:center;padding:20px;opacity:0;pointer-events:none;transition:opacity .2s}
+.qr-overlay.show{opacity:1;pointer-events:all}
+.qr-box{background:var(--surface);border-radius:var(--rl);width:100%;max-width:360px;overflow:hidden}
+.qr-hdr{padding:14px 16px;border-bottom:1px solid var(--border);display:flex;align-items:center;gap:8px}
+.qr-hdr-title{font-size:13px;font-weight:600;flex:1}
+.qr-close{width:28px;height:28px;border-radius:6px;border:none;background:var(--bg);display:flex;align-items:center;justify-content:center;cursor:pointer}
+.qr-close svg{width:14px;height:14px;fill:none;stroke:var(--t2);stroke-width:2.5}
+.qr-body{padding:16px}
+#qr-reader{width:100%;border-radius:var(--r);overflow:hidden;background:#000}
+#qr-reader video{width:100%!important;border-radius:var(--r)}
+#qr-reader img{display:none!important}
+#qr-reader__dashboard{display:none!important}
+.qr-manual-sep{display:flex;align-items:center;gap:8px;margin:12px 0;font-size:11px;color:var(--tm)}
+.qr-manual-sep::before,.qr-manual-sep::after{content:'';flex:1;height:1px;background:var(--border)}
+.qr-status{margin-top:10px;font-size:11px;color:var(--tm);text-align:center;min-height:16px}
+.qr-status.ok{color:var(--green);font-weight:500}
+.qr-status.err{color:var(--red)}
+</style></head><body>
   <h1>Reporte de Auditoría</h1>
   <div style="font-size:12px;color:#6B7280;margin-bottom:16px">A DEMO GUTCAL · Fracttal-371</div>
   <div class="meta">
@@ -855,7 +908,30 @@ function downloadPDF() {
   <div style="margin-top:32px;font-size:10px;color:#9CA3AF;border-top:1px solid #E5E7EB;padding-top:12px">
     Generado el ${new Date().toLocaleString('es-MX')} · Verificador de Activos GUTCAL · Fracttal-371
   </div>
-  </body></html>`;
+  
+<!-- QR OVERLAY -->
+<div class="qr-overlay" id="qrOverlay">
+  <div class="qr-box">
+    <div class="qr-hdr">
+      <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="var(--accent)" stroke-width="2"><rect x="3" y="3" width="7" height="7"/><rect x="14" y="3" width="7" height="7"/><rect x="3" y="14" width="7" height="7"/><rect x="14" y="14" width="3" height="3"/></svg>
+      <div class="qr-hdr-title">Escanear código QR</div>
+      <button class="qr-close" onclick="closeQR()">
+        <svg viewBox="0 0 24 24"><line x1="18" y1="6" x2="6" y2="18"/><line x1="6" y1="6" x2="18" y2="18"/></svg>
+      </button>
+    </div>
+    <div class="qr-body">
+      <div id="qr-reader"></div>
+      <div class="qr-status" id="qrStatus">Apunta la cámara al código QR del activo</div>
+      <div class="qr-manual-sep">o ingresa manualmente</div>
+      <div style="display:flex;gap:8px">
+        <input class="audit-input" id="qrManualInp" type="text" placeholder="Código TAG..." style="flex:1;height:38px" onkeydown="if(event.key==='Enter')qrManualVerify()" autocomplete="off" spellcheck="false"/>
+        <button class="btn-verify" onclick="qrManualVerify()" style="height:38px;padding:0 14px;font-size:12px">OK</button>
+      </div>
+    </div>
+  </div>
+</div>
+
+</body></html>`;
 
   const blob = new Blob([html], {type:'text/html'});
   const url = URL.createObjectURL(blob);
@@ -926,5 +1002,28 @@ function showToast(msg, isErr) {
   setTimeout(()=>t.classList.remove('show'), 3500);
 }
 </script>
+
+<!-- QR OVERLAY -->
+<div class="qr-overlay" id="qrOverlay">
+  <div class="qr-box">
+    <div class="qr-hdr">
+      <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="var(--accent)" stroke-width="2"><rect x="3" y="3" width="7" height="7"/><rect x="14" y="3" width="7" height="7"/><rect x="3" y="14" width="7" height="7"/><rect x="14" y="14" width="3" height="3"/></svg>
+      <div class="qr-hdr-title">Escanear código QR</div>
+      <button class="qr-close" onclick="closeQR()">
+        <svg viewBox="0 0 24 24"><line x1="18" y1="6" x2="6" y2="18"/><line x1="6" y1="6" x2="18" y2="18"/></svg>
+      </button>
+    </div>
+    <div class="qr-body">
+      <div id="qr-reader"></div>
+      <div class="qr-status" id="qrStatus">Apunta la cámara al código QR del activo</div>
+      <div class="qr-manual-sep">o ingresa manualmente</div>
+      <div style="display:flex;gap:8px">
+        <input class="audit-input" id="qrManualInp" type="text" placeholder="Código TAG..." style="flex:1;height:38px" onkeydown="if(event.key==='Enter')qrManualVerify()" autocomplete="off" spellcheck="false"/>
+        <button class="btn-verify" onclick="qrManualVerify()" style="height:38px;padding:0 14px;font-size:12px">OK</button>
+      </div>
+    </div>
+  </div>
+</div>
+
 </body>
 </html>
