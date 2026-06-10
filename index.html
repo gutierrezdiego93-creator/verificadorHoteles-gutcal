@@ -419,38 +419,67 @@ const TREE = [{
   ]
 }];
 
+// ══════════════════════════════════════════════
+//  ACTIVOS — Datos reales Fracttal-371 · 10 Jun 2026
+//  id       = ID interno Fracttal (campo 'id' en API)
+//  code     = Código TAG del activo
+//  qrId     = ID que aparece al final de la URL del QR de Fracttal
+//             URL formato: https://app.fracttal.com/#inventories.equipments/{qrId}
+//             o bien:      https://one.fracttal.com/qr/{uuid}  → se resuelve por id
+// ══════════════════════════════════════════════
 const ASSETS=[
-  {code:'MMCHEF',name:'MONTACARGAS',locId:46132282,locName:'ÁREA DE ALMACENAMIENTO',path:'FARQUI SRL → NAVE PRINCIPAL → ÁREA DE ALMACENAMIENTO'},
-  {code:'RICHEF',name:'REFRIGERADORA INDUSTRIAL',locId:46132282,locName:'ÁREA DE ALMACENAMIENTO',path:'FARQUI SRL → NAVE PRINCIPAL → ÁREA DE ALMACENAMIENTO'},
-  {code:'MACKANTHEM1',name:'CAMION MACK',locId:46135128,locName:'ÁREA DE DESPACHO',path:'FARQUI SRL → NAVE PRINCIPAL → ÁREA DE DESPACHO'},
-  {code:'EMBCHEF',name:'EMBUTIDORA',locId:46132278,locName:'ÁREA PRODUCCIÓN',path:'FARQUI SRL → NAVE PRINCIPAL → ÁREA PRODUCCIÓN'},
-  {code:'MEZCHEF',name:'MEZCLADORA',locId:46132278,locName:'ÁREA PRODUCCIÓN',path:'FARQUI SRL → NAVE PRINCIPAL → ÁREA PRODUCCIÓN'},
-  {code:'PCCHEF',name:'PICADORA DE CARNE',locId:46132278,locName:'ÁREA PRODUCCIÓN',path:'FARQUI SRL → NAVE PRINCIPAL → ÁREA PRODUCCIÓN'},
-  {code:'ROLAND306',name:'MAN-ROLAND 306',locId:43621169,locName:'ZONA ESTE SANTA FE 443',path:'DEMO B → ZONA ESTE SANTA FE 443'},
-  {code:'GUTCAL-SANDVICK-1',name:'TRITURADORA SANDVICK CH-430',locId:43621165,locName:'ZONA SUR SANTA FE 443',path:'DEMO B → ZONA SUR SANTA FE 443'},
-  {code:'HER-SEL-009',name:'TALADRO 3/4" 2-SPEED',locId:43621169,locName:'ZONA ESTE SANTA FE 443',path:'DEMO B → ZONA ESTE SANTA FE 443'},
-  {code:'MAXNOSJOB10',name:'CAMIONETA FORD',locId:47439875,locName:'FLOTA VEHICULOS REPARTO',path:'LOGISTICA → BM CARGO ZONA NORTE → FLOTA VEHICULOS REPARTO'},
-  {code:'TPC-H101-CQ',name:'CAMA QUEEN',locId:48668108,locName:'H101 (Torre Punta Cana)',path:'Hotel CODELPA → TORRE PUNTA CANA → H101'},
-  {code:'TPC-H102-CQ',name:'CAMA QUEEN',locId:48668107,locName:'H102 (Torre Punta Cana)',path:'Hotel CODELPA → TORRE PUNTA CANA → H102'},
-  {code:'TPC-H103-CQ',name:'CAMA QUEEN',locId:48668109,locName:'H103 (Torre Punta Cana)',path:'Hotel CODELPA → TORRE PUNTA CANA → H103'},
-  {code:'TPC-H101-TELF',name:'TELÉFONO',locId:48668108,locName:'H101 (Torre Punta Cana)',path:'Hotel CODELPA → TORRE PUNTA CANA → H101'},
-  {code:'TPC-H102-TELF',name:'TELÉFONO',locId:48668107,locName:'H102 (Torre Punta Cana)',path:'Hotel CODELPA → TORRE PUNTA CANA → H102'},
-  {code:'TPC-H103-TELF',name:'TELÉFONO',locId:48668109,locName:'H103 (Torre Punta Cana)',path:'Hotel CODELPA → TORRE PUNTA CANA → H103'},
-  {code:'TPC-H101-TV50',name:'TELEVISOR 50"',locId:48668108,locName:'H101 (Torre Punta Cana)',path:'Hotel CODELPA → TORRE PUNTA CANA → H101'},
-  {code:'TPC-H102-TV50',name:'TELEVISOR 50"',locId:48668107,locName:'H102 (Torre Punta Cana)',path:'Hotel CODELPA → TORRE PUNTA CANA → H102'},
-  {code:'TPC-H103-TV50',name:'TELEVISOR 50"',locId:48668109,locName:'H103 (Torre Punta Cana)',path:'Hotel CODELPA → TORRE PUNTA CANA → H103'},
-  {code:'TSD-H101-CQ',name:'CAMA QUEEN',locId:48668130,locName:'H101 (Torre Santo Domingo)',path:'Hotel CODELPA → TORRE SANTO DOMINGO → H101'},
-  {code:'TSD-H102-CQ',name:'CAMA QUEEN',locId:48668131,locName:'H102 (Torre Santo Domingo)',path:'Hotel CODELPA → TORRE SANTO DOMINGO → H102'},
-  {code:'TSD-H103-CQ',name:'CAMA QUEEN',locId:48668129,locName:'H103 (Torre Santo Domingo)',path:'Hotel CODELPA → TORRE SANTO DOMINGO → H103'},
-  {code:'TSD-H101-TELF',name:'TELÉFONO',locId:48668130,locName:'H101 (Torre Santo Domingo)',path:'Hotel CODELPA → TORRE SANTO DOMINGO → H101'},
-  {code:'TSD-H102-TELF',name:'TELÉFONO',locId:48668131,locName:'H102 (Torre Santo Domingo)',path:'Hotel CODELPA → TORRE SANTO DOMINGO → H102'},
-  {code:'TSD-H103-TELF',name:'TELÉFONO',locId:48668129,locName:'H103 (Torre Santo Domingo)',path:'Hotel CODELPA → TORRE SANTO DOMINGO → H103'},
-  {code:'TSD-H101-TV50',name:'TELEVISOR 50"',locId:48668130,locName:'H101 (Torre Santo Domingo)',path:'Hotel CODELPA → TORRE SANTO DOMINGO → H101'},
-  {code:'TSD-H102-TV50',name:'TELEVISOR 50"',locId:48668131,locName:'H102 (Torre Santo Domingo)',path:'Hotel CODELPA → TORRE SANTO DOMINGO → H102'},
-  {code:'TSD-H103-TV50',name:'TELEVISOR 50"',locId:48668129,locName:'H103 (Torre Santo Domingo)',path:'Hotel CODELPA → TORRE SANTO DOMINGO → H103'},
+  // FARQUI SRL
+  {id:46138230,code:'MMCHEF',       name:'Montacargas',              locId:46132282,locName:'ÁREA DE ALMACENAMIENTO', path:'FARQUI SRL → NAVE PRINCIPAL → ÁREA DE ALMACENAMIENTO'},
+  {id:46138226,code:'RICHEF',       name:'Refrigeradora Industrial', locId:46132282,locName:'ÁREA DE ALMACENAMIENTO', path:'FARQUI SRL → NAVE PRINCIPAL → ÁREA DE ALMACENAMIENTO'},
+  {id:45493872,code:'MACKANTHEM1',  name:'Camion Mack',              locId:46135128,locName:'ÁREA DE DESPACHO',       path:'FARQUI SRL → NAVE PRINCIPAL → ÁREA DE DESPACHO'},
+  {id:46138238,code:'EMBCHEF',      name:'Embutidora',               locId:46132278,locName:'ÁREA PRODUCCIÓN',        path:'FARQUI SRL → NAVE PRINCIPAL → ÁREA PRODUCCIÓN'},
+  {id:46138239,code:'MEZCHEF',      name:'Mezcladora',               locId:46132278,locName:'ÁREA PRODUCCIÓN',        path:'FARQUI SRL → NAVE PRINCIPAL → ÁREA PRODUCCIÓN'},
+  {id:46138236,code:'PCCHEF',       name:'Picadora de Carne',        locId:46132278,locName:'ÁREA PRODUCCIÓN',        path:'FARQUI SRL → NAVE PRINCIPAL → ÁREA PRODUCCIÓN'},
+  // DEMO B
+  {id:43621203,code:'ROLAND306',         name:'Man-Roland 306',            locId:43621169,locName:'ZONA ESTE SANTA FE 443',path:'DEMO B → ZONA ESTE SANTA FE 443'},
+  {id:44721017,code:'GUTCAL-SANDVICK-1', name:'Trituradora Sandvick CH-430',locId:43621165,locName:'ZONA SUR SANTA FE 443', path:'DEMO B → ZONA SUR SANTA FE 443'},
+  {id:17687688,code:'HER-SEL-009',       name:'3/4" 2 Speed Hammer Drill', locId:43621169,locName:'ZONA ESTE SANTA FE 443',path:'DEMO B → ZONA ESTE SANTA FE 443'},
+  // LOGISTICA
+  {id:2438,    code:'MAXNOSJOB10',  name:'0001 Camioneta Ford',      locId:47439875,locName:'FLOTA VEHICULOS REPARTO', path:'LOGISTICA → BM CARGO ZONA NORTE → FLOTA VEHICULOS REPARTO'},
+  {id:46131867,code:'',            name:'Vehículo de Carga 1',       locId:46128858,locName:'BM CARGO ZONA SUR',       path:'LOGISTICA → BM CARGO ZONA SUR'},
+  {id:46131866,code:'',            name:'Vehículo de Carga 2',       locId:46128858,locName:'BM CARGO ZONA SUR',       path:'LOGISTICA → BM CARGO ZONA SUR'},
+  {id:46131870,code:'',            name:'Vehículo de Carga 3',       locId:46128858,locName:'BM CARGO ZONA SUR',       path:'LOGISTICA → BM CARGO ZONA SUR'},
+  {id:46131868,code:'',            name:'Vehículo de Carga 4',       locId:46128858,locName:'BM CARGO ZONA SUR',       path:'LOGISTICA → BM CARGO ZONA SUR'},
+  {id:46131869,code:'',            name:'Vehículo de Carga 5',       locId:46128858,locName:'BM CARGO ZONA SUR',       path:'LOGISTICA → BM CARGO ZONA SUR'},
+  // HOTEL CODELPA — TORRE PUNTA CANA
+  {id:48668133,code:'TPC-H101-CQ',  name:'Cama Queen',   locId:48668108,locName:'H101 (Torre Punta Cana)',    path:'Hotel CODELPA → TORRE PUNTA CANA → H101'},
+  {id:48668137,code:'TPC-H102-CQ',  name:'Cama Queen',   locId:48668107,locName:'H102 (Torre Punta Cana)',    path:'Hotel CODELPA → TORRE PUNTA CANA → H102'},
+  {id:48668136,code:'TPC-H103-CQ',  name:'Cama Queen',   locId:48668109,locName:'H103 (Torre Punta Cana)',    path:'Hotel CODELPA → TORRE PUNTA CANA → H103'},
+  {id:48668140,code:'TPC-H101-TELF',name:'Teléfono',     locId:48668108,locName:'H101 (Torre Punta Cana)',    path:'Hotel CODELPA → TORRE PUNTA CANA → H101'},
+  {id:48668135,code:'TPC-H102-TELF',name:'Teléfono',     locId:48668107,locName:'H102 (Torre Punta Cana)',    path:'Hotel CODELPA → TORRE PUNTA CANA → H102'},
+  {id:48668139,code:'TPC-H103-TELF',name:'Teléfono',     locId:48668109,locName:'H103 (Torre Punta Cana)',    path:'Hotel CODELPA → TORRE PUNTA CANA → H103'},
+  {id:48668134,code:'TPC-H101-TV50',name:'Televisor 50"',locId:48668108,locName:'H101 (Torre Punta Cana)',    path:'Hotel CODELPA → TORRE PUNTA CANA → H101'},
+  {id:48668132,code:'TPC-H102-TV50',name:'Televisor 50"',locId:48668107,locName:'H102 (Torre Punta Cana)',    path:'Hotel CODELPA → TORRE PUNTA CANA → H102'},
+  {id:48668138,code:'TPC-H103-TV50',name:'Televisor 50"',locId:48668109,locName:'H103 (Torre Punta Cana)',    path:'Hotel CODELPA → TORRE PUNTA CANA → H103'},
+  {id:48668112,code:'TELEVISOR50',  name:'Televisor 50"',locId:48668108,locName:'H101 (Torre Punta Cana)',    path:'Hotel CODELPA → TORRE PUNTA CANA → H101'},
+  {id:48668111,code:'TELEVISOR50',  name:'Televisor 50"',locId:48668107,locName:'H102 (Torre Punta Cana)',    path:'Hotel CODELPA → TORRE PUNTA CANA → H102'},
+  {id:48668110,code:'TELEVISOR50',  name:'Televisor 50"',locId:48668109,locName:'H103 (Torre Punta Cana)',    path:'Hotel CODELPA → TORRE PUNTA CANA → H103'},
+  // HOTEL CODELPA — TORRE SANTO DOMINGO
+  {id:48668147,code:'TSD-H101-CQ',  name:'Cama Queen',   locId:48668130,locName:'H101 (Torre Santo Domingo)', path:'Hotel CODELPA → TORRE SANTO DOMINGO → H101'},
+  {id:48668142,code:'TSD-H102-CQ',  name:'Cama Queen',   locId:48668131,locName:'H102 (Torre Santo Domingo)', path:'Hotel CODELPA → TORRE SANTO DOMINGO → H102'},
+  {id:48668149,code:'TSD-H103-CQ',  name:'Cama Queen',   locId:48668129,locName:'H103 (Torre Santo Domingo)', path:'Hotel CODELPA → TORRE SANTO DOMINGO → H103'},
+  {id:48668145,code:'TSD-H101-TELF',name:'Teléfono',     locId:48668130,locName:'H101 (Torre Santo Domingo)', path:'Hotel CODELPA → TORRE SANTO DOMINGO → H101'},
+  {id:48668144,code:'TSD-H102-TELF',name:'Teléfono',     locId:48668131,locName:'H102 (Torre Santo Domingo)', path:'Hotel CODELPA → TORRE SANTO DOMINGO → H102'},
+  {id:48668143,code:'TSD-H103-TELF',name:'Teléfono',     locId:48668129,locName:'H103 (Torre Santo Domingo)', path:'Hotel CODELPA → TORRE SANTO DOMINGO → H103'},
+  {id:48668146,code:'TSD-H101-TV50',name:'Televisor 50"',locId:48668130,locName:'H101 (Torre Santo Domingo)', path:'Hotel CODELPA → TORRE SANTO DOMINGO → H101'},
+  {id:48668148,code:'TSD-H102-TV50',name:'Televisor 50"',locId:48668131,locName:'H102 (Torre Santo Domingo)', path:'Hotel CODELPA → TORRE SANTO DOMINGO → H102'},
+  {id:48668141,code:'TSD-H103-TV50',name:'Televisor 50"',locId:48668129,locName:'H103 (Torre Santo Domingo)', path:'Hotel CODELPA → TORRE SANTO DOMINGO → H103'},
 ];
+
+// Índice por CÓDIGO (case-insensitive)
 const AIDX={};
-ASSETS.forEach(a=>{if(a.code&&!AIDX[a.code.toUpperCase()])AIDX[a.code.toUpperCase()]=a;});
+ASSETS.forEach(a=>{ if(a.code && !AIDX[a.code.toUpperCase()]) AIDX[a.code.toUpperCase()]=a; });
+
+// Índice por ID interno de Fracttal
+// El QR de Fracttal genera: https://app.fracttal.com/#inventories.equipments/{id}
+// o https://one.fracttal.com/qr/{uuid} — en ese caso buscamos por id también
+const AIDX_ID={};
+ASSETS.forEach(a=>{ if(a.id) AIDX_ID[String(a.id)]=a; });
 
 // ══════════════════════════════════════════════
 //  STATE
@@ -1113,8 +1142,18 @@ function extractCode(raw) {
   const t = raw.trim();
   try {
     const url = new URL(t);
+    // Format 1: https://app.fracttal.com/#inventories.equipments/48668147
+    const hash = url.hash; // e.g. #inventories.equipments/48668147
+    if (hash && hash.includes('/')) {
+      const hashId = hash.split('/').pop();
+      if (hashId && /^\d+$/.test(hashId)) return '__ID__' + hashId;
+    }
+    // Format 2: https://one.fracttal.com/qr/UUID  → extract last path segment
     const parts = url.pathname.split('/').filter(Boolean);
-    return parts[parts.length - 1] || t;
+    const last = parts[parts.length - 1];
+    // If it looks like a UUID, return as __UUID__ prefix for ID lookup fallback
+    if (last && last.includes('-')) return '__ID_RESOLVE__' + last;
+    return last || t;
   } catch { return t; }
 }
 
@@ -1126,11 +1165,53 @@ function qrManualVerify() {
   processCode(code);
 }
 
-function processCode(code) {
+function processCode(raw) {
   if (!activeSession) return;
+  let code = raw;
+  // If QR returned a Fracttal numeric ID, find the asset and use its code
+  if (raw.startsWith('__ID__')) {
+    const id = raw.replace('__ID__', '');
+    const asset = AIDX_ID[id];
+    if (asset && asset.code) {
+      code = asset.code;
+      showToast('QR detectado: ' + asset.name + ' (' + asset.code + ')', false);
+    } else if (asset) {
+      // Asset found by ID but has no code — verify directly by ID
+      verifyById(id);
+      return;
+    } else {
+      showToast('ID ' + id + ' no encontrado en el sistema', true);
+      code = id; // fallback — let auditVerify handle it as unknown
+    }
+  } else if (raw.startsWith('__ID_RESOLVE__')) {
+    // UUID from one.fracttal.com/qr — we don't have UUID index, use as unknown
+    const uuid = raw.replace('__ID_RESOLVE__', '');
+    showToast('QR escaneado — ingresa el código manualmente si no se resuelve', true);
+    code = uuid;
+  }
   const inp = document.getElementById('auditInp');
   if (inp) inp.value = code;
   auditVerify();
+}
+
+// Verify directly by Fracttal internal ID (for assets without code)
+function verifyById(id) {
+  const asset = AIDX_ID[id];
+  if (!asset || !activeSession) return;
+  const time = new Date().toLocaleTimeString('es-MX',{hour:'2-digit',minute:'2-digit'});
+  const ok = isCorrect(asset.locId, activeSession.locId);
+  const entry = {
+    code: 'ID:' + id,
+    name: asset.name,
+    status: ok ? 'ok' : 'err',
+    locName: asset.locName,
+    locPath: asset.path,
+    time
+  };
+  if (ok) { activeSession.ok.push(entry); addCardToCol('colOk', entry, 'ok'); }
+  else    { activeSession.err.push(entry); addCardToCol('colErr', entry, 'err'); }
+  document.getElementById('cntOk').textContent = activeSession.ok.length;
+  document.getElementById('cntErr').textContent = activeSession.err.length + activeSession.warn.length;
 }
 
 </script>
